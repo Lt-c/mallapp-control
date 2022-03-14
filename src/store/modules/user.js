@@ -32,11 +32,11 @@ const actions = {
   async login({ commit }, userInfo) {
     // 解构出用户名和密码
     const { username, password } = userInfo
-    let result = await login({ username: username.trim(), password: password })
+    const result = await login({ username: username.trim(), password: password })
     // 当前使用的是mock数据，mock数据的code是20000
-    if (result.code == 20000) {
-      commit('SET_TOKEN', result.data.token);
-      setToken(data.token);
+    if (result.code === 20000) {
+      commit('SET_TOKEN', result.data.token)
+      setToken(result.data.token)
       return 'ok'
     } else {
       return Promise.reject(new Error('faile'))
