@@ -29,7 +29,7 @@
           width="width"
         >
           <template slot-scope="row" @change="console.log(row)">
-            <el-tag v-for="attrValue in row.attrValueList" :key="attrValue.id" type="success">{{ attrValue.id }}</el-tag>
+            <el-tag v-for="attrValue in row.attrValueList" :key="attrValue.id" type="success">{{ attrValue.valueName }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column
