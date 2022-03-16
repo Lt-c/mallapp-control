@@ -12,3 +12,6 @@ export const reqGetCategory3List = (category2Id) => request({ url: `/admin/produ
 
 // 根据categoryid 请求数据 /admin/product/attrInfoList/{category1Id}/{category2Id}/{category3Id}  get
 export const reqAttrInfoList = (category1Id, category2Id, category3Id) => request({ url: `/admin/product/attrInfoList/${category1Id}/${category2Id}/${category3Id}`, method: 'get' })
+
+// 添加属性和属性值接口 /admin/product/saveAttrInfo   post
+export const reqAddAttrInfo = (baseAttrInfo) => request({ url: `/admin/product/saveAttrInfo`, method: 'post', data: baseAttrInfo })
