@@ -12,7 +12,7 @@
           <el-table-column label="序号" width="80" type="index" align="center" />
           <el-table-column prop="attrName" label="属性名称" width="150" align="center" />
           <el-table-column prop="prop" label="属性值列表" width="width">
-            <!-- 此处的template 的slot-scope需要使用花括号 -->
+            <!-- 此处的template 的st-scope需要使用花括号 -->
             <template slot-scope="{row}">
               <el-tag v-for="attrValue in row.attrValueList" :key="attrValue.id" type="success">{{ attrValue.valueName }}</el-tag>
             </template>
@@ -57,6 +57,7 @@
 </template>
 
 <script>
+import deepclone from 'lodash/cloneDeep'
 export default {
   name: 'Attr',
   data() {
@@ -127,14 +128,16 @@ export default {
       // valueName 相应的属性值的名称
       this.attrInfo.attrValueList.push({
         attrId: undefined,
-        valueName: this.attrInfo.attrName
+        valueName: ''
       })
     },
     // 修改某一个属性
     updateAttr(row) {
       // 隐藏table
       this.isShowTable = !this.isShowTable
-      this.attrInfo = row
+      // 由于数据当中有数组套对象，所以需要使用deepclone
+      // this.attrInfo = row
+      this.attrInfo = deepclone(row)
     }
   }
 }
