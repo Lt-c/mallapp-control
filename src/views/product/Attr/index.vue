@@ -40,12 +40,14 @@
           <el-table-column label="序号" width="80" align="center" type="index" />
           <el-table-column prop="prop" label="属性值名称" width="width">
             <template slot-scope="{row}">
-              <el-input v-model="row.valueName" placeholder="请输入属性名称" size="mini" />
+              <!-- 这里需要sapn和input切换 -->
+              <el-input v-if="row.flag" v-model="row.valueName" autofocus placeholder="请输入属性名称" size="mini" @blur="changeFlag(row)" @keyup.native.enter="changeFlag(row)" />
+              <span v-else style="display:block" @click="row.flag = true">{{ row.valueName }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="address" label="操作" width="width">
             <template slot-scope="{row}">
-              <el-button type="danger" icon="el-icon-delete" size="mini" />
+              <el-button type="danger" icon="el-icon-delete" size="mini">{{ row }}} </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -113,10 +115,9 @@ export default {
       // 切换table的显示和隐藏
       this.isShowTable = !this.isShowTable
       // 清楚原有的数据
-      this.attrList = {
+      this.attrInfo = {
         attrName: '',
-        attrValueList: [
-        ],
+        attrValueList: [],
         categoryId: this.category3Id,
         categoryLevel: 3
       }
@@ -127,9 +128,12 @@ export default {
       // attrId 是相应的属性id，目前而言我们是添加属性的操作，没有相应属性的id，
       // valueName 相应的属性值的名称
       this.attrInfo.attrValueList.push({
-        attrId: undefined,
-        valueName: ''
+        attrId: this.attrInfo.id, // 对于修改某一个属性时，可以在已有的属性基础之上新增新的属性值（新增属性值时，需要把已有的属性id带上）
+        valueName: '',
+        flag: true // 用于判断显示span或input
       })
+      // flag属性，给每一个属性值新增一个flag属性，用户切换查看或者是编辑，用于每一个属性值，可以自己控制
+      // 当前flag属性是响应式的，可以被vue检测到
     },
     // 修改某一个属性
     updateAttr(row) {
@@ -138,6 +142,27 @@ export default {
       // 由于数据当中有数组套对象，所以需要使用deepclone
       // this.attrInfo = row
       this.attrInfo = deepclone(row)
+    },
+    // 切换属性值flag 查看模式|修改模式
+    changeFlag(row) {
+      // 由编辑模式切换为查看模式
+      // 属性值不能为空，，控制不能作为新的属性值，需要输入一个其他的值
+      if (row.valueName.trim() === '') {
+        this.$message('属性值不能为空，请输入一个有效值!')
+        return
+      }
+      // 属性值不能与已有的重复
+      const isRepeat = this.attrInfo.attrValueList.some(item => {
+        // 需要判断row和item是否为两个对象  ,row为新增的元素
+        if (row !== item) {
+          return item.valueName === row.valueName.trim()
+        }
+      })
+      if (isRepeat) {
+        this.$message('属性值不能重复，请输入一个有效值!')
+        return
+      }
+      row.flag = false
     }
   }
 }
