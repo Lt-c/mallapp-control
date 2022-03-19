@@ -1,5 +1,7 @@
 <template>
-  <div>Sku</div>
+  <div>
+    <CategorySelect />
+    </categoryselect></div>
 </template>
 
 <script>
