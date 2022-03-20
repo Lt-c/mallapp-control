@@ -39,10 +39,10 @@
         <el-table style="width: 100%; margin:20px 0" border :data="attrInfo.attrValueList">
           <el-table-column label="序号" width="80" align="center" type="index" />
           <el-table-column prop="prop" label="属性值名称" width="width">
-            <template slot-scope="{row}">
-              <!-- 这里需要sapn和input切换 -->
-              <el-input v-if="row.flag" v-model="row.valueName" autofocus placeholder="请输入属性名称" size="mini" @blur="changeFlag(row)" @keyup.native.enter="changeFlag(row)" />
-              <span v-else style="display:block" @click="row.flag = true">{{ row.valueName }}</span>
+            <template slot-scope="{row, $index}">
+              <!-- 这里需要sapn和input切换  此处的$index用于区分input，实现自动聚焦这个input-->
+              <el-input v-if="row.flag" :ref="$index" v-model="row.valueName" autofocus placeholder="请输入属性名称" size="mini" @blur="changeFlag(row)" @keyup.native.enter="changeFlag(row)" />
+              <span v-else style="display:block" @click="toEdit(row)">{{ row.valueName }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="address" label="操作" width="width">
@@ -163,6 +163,11 @@ export default {
         return
       }
       row.flag = false
+    },
+    // 标签切换到编辑模式 点击span的回调
+    toEdit(row) {
+      row.flag = true
+      console.log(this.$refs)
     }
   }
 }
