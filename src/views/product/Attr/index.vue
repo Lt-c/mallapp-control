@@ -42,12 +42,15 @@
             <template slot-scope="{row, $index}">
               <!-- 这里需要sapn和input切换  此处的$index用于区分input，实现自动聚焦这个input-->
               <el-input v-if="row.flag" :ref="$index" v-model="row.valueName" autofocus placeholder="请输入属性名称" size="mini" @blur="changeFlag(row)" @keyup.native.enter="changeFlag(row)" />
-              <span v-else style="display:block" @click="toEdit(row)">{{ row.valueName }}</span>
+              <span v-else style="display:block" @click="toEdit(row,$index)">{{ row.valueName }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="address" label="操作" width="width">
-            <template slot-scope="{row}">
-              <el-button type="danger" icon="el-icon-delete" size="mini">{{ row }}} </el-button>
+            <template slot-scope="{row,$index}">
+              <!-- 气泡确认框popconfirm  title使用模板字符串-->
+              <el-popconfirm :title="`确定删除${row.valueName}?`" @onConfirm="deleteAttrValue($index)">
+                <el-button slot="reference" type="danger" icon="el-icon-delete" size="mini">删除 </el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -81,6 +84,7 @@ export default {
     }
   },
   methods: {
+    // 自定义时间，接收子组件传递来的数据
     getCategoryId({ categoryId, level }) {
       // 区分三级分类相应的id，以及父组件进行存储
       if (level === 1) {
@@ -134,6 +138,11 @@ export default {
       })
       // flag属性，给每一个属性值新增一个flag属性，用户切换查看或者是编辑，用于每一个属性值，可以自己控制
       // 当前flag属性是响应式的，可以被vue检测到
+
+      // 添加属性时候，也应该实现自动聚焦。添加属性，是在数组的最后一个元素
+      this.$nextTick(() => {
+        this.$refs[this.this.attrInfo.attrValueList.length - 1].focus()
+      })
     },
     // 修改某一个属性
     updateAttr(row) {
@@ -165,9 +174,25 @@ export default {
       row.flag = false
     },
     // 标签切换到编辑模式 点击span的回调
-    toEdit(row) {
-      row.flag = true
-      console.log(this.$refs)
+    toEdit(row, index) {
+      // row.flag = true
+      // 不能直接使用添加flag属性，需要使用set方法，vue 才能检测这个属性
+      this.$set(row, 'flag', true)
+      // console.log(this.$refs)
+      // console.log(row)
+      // 需要注意，再点击span的时候，切换为input 编辑模式，需要注意，浏览器重绘和重排，是需要时间的
+      // 因此，在点击span的时候，重排重绘input需要时间，所以我们不能一点击就立刻获取到input
+      // 所以执行完毕后再执行这个focus
+      this.$nextTick(() => {
+        // 自动聚焦到这个点击的焦点
+        this.$refs[index].focus()
+      })
+    },
+    // 气泡确认框，确定删除属性值回调
+    deleteAttrValue(index) {
+      // 删除数组中的属性值
+      // 当前删除属性值的操作，是不需要发送请求，原因，使用保存按钮，统一发送请求
+      this.attrInfo.attrValueList.splice(index, 1)
     }
   }
 }
