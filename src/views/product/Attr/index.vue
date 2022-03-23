@@ -1,7 +1,8 @@
 <template>
   <div>
     <el-card style="margin: 20px 0">
-      <CategorySelect @getCategoryId="getCategoryId" />
+      <!-- show 传递isShowTable 控制下拉框是否可选 跳转到属性界面时，不可选-->
+      <CategorySelect :show="!isShowTable" @getCategoryId="getCategoryId" />
     </el-card>
     <el-card>
       <div v-show="isShowTable">
@@ -47,14 +48,15 @@
           </el-table-column>
           <el-table-column prop="address" label="操作" width="width">
             <template slot-scope="{row,$index}">
-              <!-- 气泡确认框popconfirm  title使用模板字符串-->
+              <!-- 删除操作 气泡确认框popconfirm  title使用模板字符串-->
               <el-popconfirm :title="`确定删除${row.valueName}?`" @onConfirm="deleteAttrValue($index)">
                 <el-button slot="reference" type="danger" icon="el-icon-delete" size="mini">删除 </el-button>
               </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
-        <el-button type="primary">保存</el-button>
+        <!-- 按钮和三级联动的配合，当没有属性值时，不能保存 -->
+        <el-button type="primary" :disabled="attrInfo.attrValueList.length < 1" @click="addOrUpdateArrt">保存</el-button>
         <el-button @click="controlTableShow">取消</el-button>
       </div>
     </el-card>
@@ -134,14 +136,14 @@ export default {
       this.attrInfo.attrValueList.push({
         attrId: this.attrInfo.id, // 对于修改某一个属性时，可以在已有的属性基础之上新增新的属性值（新增属性值时，需要把已有的属性id带上）
         valueName: '',
-        flag: true // 用于判断显示span或input
+        flag: true // 用于判断显示span或input  服务器是不需要这个字段，所以在上传的时候去掉
       })
       // flag属性，给每一个属性值新增一个flag属性，用户切换查看或者是编辑，用于每一个属性值，可以自己控制
       // 当前flag属性是响应式的，可以被vue检测到
 
       // 添加属性时候，也应该实现自动聚焦。添加属性，是在数组的最后一个元素
       this.$nextTick(() => {
-        this.$refs[this.this.attrInfo.attrValueList.length - 1].focus()
+        this.$refs[this.attrInfo.attrValueList.length - 1].focus()
       })
     },
     // 修改某一个属性
@@ -193,6 +195,29 @@ export default {
       // 删除数组中的属性值
       // 当前删除属性值的操作，是不需要发送请求，原因，使用保存按钮，统一发送请求
       this.attrInfo.attrValueList.splice(index, 1)
+    },
+    // 保存按钮 新增或者修改属性和属性值
+    async addOrUpdateArrt() {
+      // 整理提交参数， 服务器不需要flag
+      this.attrInfo.attrValueList = this.attrInfo.attrValueList.filter(item => {
+        // 过滤属性值是否为空
+        if (item.valueName !== '') {
+          // 删除flag
+          delete item.flag
+          return true
+        }
+      })
+      try {
+        await this.$API.attr.reqAddOrUpdateAttr(this.attrInfo)
+        // 跳转到数据展示页面
+        this.isShowTable = true
+        // 提示消息框
+        this.$message({ type: 'success', message: '保存成功' })
+        // 保存成功后，需要再次获取平台属性用于展示
+        this.getAttrList()
+      } catch (error) {
+        // console.log('##', error)
+      }
     }
   }
 }
