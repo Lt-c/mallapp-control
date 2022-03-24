@@ -1,12 +1,11 @@
 <template>
   <el-form ref="form" :model="form" label-width="80px">
     <el-form-item label="SPU名称">
-      <el-input v-model="form.name" placeholder="SPU名称" />
+      <el-input v-model="spu.spuName" placeholder="SPU名称" />
     </el-form-item>
     <el-form-item label="品牌">
-      <el-select v-model="form.region" placeholder="请选择品牌">
-        <el-option label="区域一" value="shanghai" />
-        <el-option label="区域二" value="beijing" />
+      <el-select v-model="tmList" placeholder="请选择品牌">
+        <el-option v-for="tm in tmList" :key="tm.id" :label="tm.tmName" value="shanghai" />
       </el-select>
     </el-form-item>
     <el-form-item label="SPU描述">
@@ -39,8 +38,8 @@
       </el-table>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="onSubmit">保存</el-button>
-      <el-button>取消</el-button>
+      <el-button type="primary">保存</el-button>
+      <el-button @click="$emit('changeScreen',0)">取消</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -56,16 +55,49 @@ export default {
       // 照片墙相关
       dialogImageUrl: '',
       // dialog 控制显示大图
-      dialogVisible: false
+      dialogVisible: false,
+      // 存储spu属性
+      spu: {}, // 存储spu信息属性
+      tmList: [], // 存储品牌信息
+      spuImgList: [], // 存储spu图片属性
+      saleAttrList: [] // 存储销售属性
+
     }
   },
-  // 照片墙相关的 两个methods
-  handleRemove(file, fileList) {
-    console.log(file, fileList)
-  },
-  handlePictureCardPreview(file) {
-    this.dialogImageUrl = file.url
-    this.dialogVisible = true
+  methods: {
+    // 照片墙相关的 两个methods
+    handleRemove(file, fileList) {
+      console.log(file, fileList)
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
+    },
+    // 初始化SpuForm数据
+    async initSpuData(spu) {
+      console.log('发数据', spu)
+      // 获取spu信息的数据
+      const spuResult = await this.$API.spu.reqSpuInfo(spu.id)
+      if (spuResult.code === 200) {
+        this.spu = spuResult.data
+      }
+      // 获取品牌的信息
+      const tmResult = await this.$API.spu.reqTradeMarkList()
+      if (tmResult.code === 200) {
+        this.tmList = tmResult.data
+      }
+      // 获取spu图片
+      const imgResult = await this.$API.spu.reqSpuImageList(spu.id)
+      if (imgResult.code === 200) {
+        this.spuImgList = imgResult.data
+      }
+      // 获取平台全部的销售属性
+      const saleResult = await this.$API.sku.reqBaseSaleAttrList()
+      if (saleResult.code === 200) {
+        this.saleAttrList = saleResult.data
+      }
+    }
+
   }
 }
 </script>

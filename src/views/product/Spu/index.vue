@@ -13,7 +13,7 @@
           <el-table-column prop="spuName" label="Sku名称" width="width" />
           <el-table-column prop="description" label="Sku描述" width="width" />
           <el-table-column prop="prop" label="操作" width="width">
-            <template slot-scope="{row, $index}">
+            <template slot-scope="{row}">
               <!-- {{ row }} -->
               <!-- 按钮，这里按钮将来用hintbutton替代 因为鼠标hover时需要有提示 -->
               <hint-button type="success" icon="el-icon-plus" size="mini" title="添加Sku">1</hint-button>
@@ -34,7 +34,7 @@
           @size-change="handleSizeChange"
         />
       </div>
-      <SpuForm v-show="screen==1" />
+      <SpuForm v-show="screen==1" ref="spu" @changeScreen="changeScreen" />
       <SkuForm v-show="screen==2" />
     </el-card>
   </div>
@@ -85,7 +85,7 @@ export default {
     // 获取spu列表数据的方法
     async getSpuList() {
       const { page, limit, category3Id } = this
-      const result = await this.$API.spu.reqSkuList(page, limit, category3Id)
+      const result = await this.$API.spu.reqSpuList(page, limit, category3Id)
       if (result.code === 200) {
         this.list = result.data.records
         this.total = result.data.total
@@ -107,8 +107,14 @@ export default {
     },
     // 修改某一个spu
     updataSku(row) {
-      console.log(row)
+      // console.log(row)
       this.screen = 1
+      // 获取子组件，通过父组件发送请求
+      this.$refs.spu.initSpuData(row)
+    },
+    // 取消按钮，需要子组件传递给父组件
+    changeScreen(screen) {
+      this.screen = screen
     }
   }
 }
