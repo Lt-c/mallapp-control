@@ -16,6 +16,8 @@
       action提交给谁上传的地址
       list-type 文件列表类型
       file-list 上传文件列表 需要有name 和 url 属性
+      :on-preview 照片的预览功能  不需要收集数据
+      on-remove 删除照片
       -->
       <el-upload
         action="/dev-api/admin/product/fileUpload"
@@ -32,17 +34,18 @@
       </el-dialog>
     </el-form-item>
     <el-form-item label="销售属性">
-      <el-select v-model="attrId" :placeholder="`还有${unSelectSaleAttr.length}个未选择的属性`">
-        <el-option v-for="item in unSelectSaleAttr" :key="item.id" :label="item.name" :value="item.id" />
+      <el-select v-model="attrIdAndAttrName" :placeholder="`还有${unSelectSaleAttr.length}个未选择的属性`">
+        <el-option v-for="item in unSelectSaleAttr" :key="item.id" :label="item.name" :value="`${item.id}:${item.name}`" />
       </el-select>
-      <el-button type="primary" icon="el-icon-plus" :disabled="!attrId">添加销售属性</el-button>
+      <el-button type="primary" icon="el-icon-plus" :disabled="!attrIdAndAttrName" @click="addSaleAttr">添加销售属性</el-button>
       <!-- 展示的是当前spu属于自己的销售属性 -->
       <el-table style="width: 100%" border :data="spu.spuSaleAttrList">
         <el-table-column type="index" label="序号" width="80px" align="center" />
         <el-table-column prop="saleAttrName" label="属性名" width="width: 10%" />
         <el-table-column prop="prop" label="属性值名称列表" width="width: 60%">
           <template slot-scope="{row}">
-            <el-tag v-for="tag in row.spuSaleAttrValueList" :key="tag.id" closable :disable-transitions="false" @close="handleClose(tag)">
+            <!-- el-tag 用于展示已有属性值数据   close回调，删除tag数据-->
+            <el-tag v-for="tag,index in row.spuSaleAttrValueList" :key="tag.id" closable :disable-transitions="false" @close="row.spuSaleAttrValueList.splice(index,1)">
               {{ tag.saleAttrValueName }}
             </el-tag>
             <el-input
@@ -51,22 +54,21 @@
               v-model="row.inputValue"
               class="input-new-tag"
               size="mini"
+              @blur="handleInputConfirm(row)"
             />
-            <!-- @keyup.enter.native="handleInputConfirm"
-              @blur="handleInputConfirm" -->
-            <el-button v-else class="button-new-tag" size="small" @click="showInput">添加</el-button>
-
+            <!-- @keyup.enter.native="handleInputConfirm" -->
+            <el-button v-else class="button-new-tag" size="small" @click="addSaleAttrValue(row)">添加</el-button>
           </template>
         </el-table-column>
         <el-table-column prop="prop" label="操作" width="width: 20%">
-          <template slot-scope="{row}">
-            <el-button type="danger" icon="el-icon-delete" size="mini" />
+          <template slot-scope="{row,$index}">
+            <el-button type="danger" icon="el-icon-delete" size="mini" @click="spu.spuSaleAttrList.splice($index,1)" />
           </template>
         </el-table-column>
       </el-table>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary">保存</el-button>
+      <el-button type="primary" @click="addOrUpdateSku">保存</el-button>
       <el-button @click="$emit('changeScreen', 0)">取消</el-button>
     </el-form-item>
   </el-form>
@@ -124,7 +126,7 @@ export default {
       tmList: [], // 存储品牌信息
       spuImgList: [], // 存储spu图片属性
       saleAttrList: [], // 存储销售属性
-      attrId: '' // 销售属性的id  发送请求前，把数据整理好即可
+      attrIdAndAttrName: '' // 销售属性的id  发送请求前，把数据整理好即可
       // inputVisible: true // 控制切换
     }
   },
@@ -142,12 +144,17 @@ export default {
   },
   methods: {
     // 照片墙相关的 两个methods
+    // 照片墙删除某一个照片会触发
     handleRemove(file, fileList) {
       console.log(file, fileList)
+      // 收集照片墙的数据，fileList是删除某一张图之后的数据，含有 name url，是因为照片墙需要
+      // 对于服务器,不需要这个数据,在上传时,需要进行处理
+      this.spuImageList = fileList
     },
     handlePictureCardPreview(file) {
       console.log(file)
       this.dialogImageUrl = file.url
+      // 显示对话框，显示图片
       this.dialogVisible = true
     },
     handleUploadSuccess(response, file, fileList) {
@@ -179,7 +186,7 @@ export default {
         // 照片墙显示照片列表是数组，先进行简单的处理，需要name 和 url 两个字段
         const imgList = imgResult.data
         imgList.forEach(element => {
-          console.log(element)
+          // console.log(element)
           element.name = element.imgName
           element.url = element.imgUrl
         })
@@ -190,7 +197,48 @@ export default {
       if (saleResult.code === 200) {
         this.saleAttrList = saleResult.data
       }
+    },
+    // 添加需要收集的销售属性
+    addSaleAttr() {
+      // 把收集到的属性数据进行 处理
+      const [baseSaleAttrId, saleAttrName] = this.attrIdAndAttrName.split(':')
+      // 向spu对象中的spuSaleAttrList添加新的销售属性
+      this.spu.spuSaleAttrList.push({ baseSaleAttrId, saleAttrName, spuSaleAttrValueList: [] })
+      // 清空input框中的数据
+      this.attrIdAndAttrName = ''
+    },
+    // 添加销售属性值的回调
+    addSaleAttrValue(row) {
+      // 点击销售属性当中的添加按钮，button变为input，给当前的属性添加一个inputVisible控制显示 ，使用this.$set使vue能够检测这个数据
+      this.$set(row, 'inputVisible', true)
+      // input框的中数据，需要进行收集,用 inputValue 字段收集新增的销售属性值
+      this.$set(row, 'inputValue', '')
+    },
+    // el-input 也就是输入完成的回调
+    handleInputConfirm(row) {
+      // 以上数据并不会显示出来，结构出row中的inputValue
+      const { baseSaleAttrId, inputValue } = row
+      // 新增的销售属性值不能为空
+      if (inputValue.trim() === '') {
+        this.$message('属性值不能为空')
+        return
+      }
+      // 属性值不能重复
+      if (!row.spuSaleAttrValueList.every(item => item.saleAttrValueName !== inputValue.trim())) {
+        this.$message('属性值不能重复')
+        return
+      }
+      // 新增的销售属性值
+      const newSaleAttrValue = { baseSaleAttrId, saleAttrValueName: inputValue }
+      row.spuSaleAttrValueList.push(newSaleAttrValue)
+      // 不显示input框，显示button
+      row.inputVisible = false
+    },
+    // 点击保存的回调，向服务器发起请求
+    addOrUpdateSku() {
+      console.log('addOrUpdateSku')
     }
+
   }
 }
 </script>

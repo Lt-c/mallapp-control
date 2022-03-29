@@ -13,3 +13,14 @@ export const reqSpuImageList = (spuId) => request({ url: `/admin/product/spuImag
 
 //  /admin/product/baseSaleAttrList  get  获取平台全部的销售属性 最多三个
 export const reqBaseSaleAttrList = () => request({ url: `/admin/product/baseSaleAttrList`, method: 'get' })
+
+// 修改|添加spu 对于修改或者是添加spu携带给服务器的数据大致是相同的，唯一的区别是携带的数据是否有id
+export const reqAddOrUpdateSku = (spu) => {
+  // 修改spu
+  if (spu.id) {
+    return request({ url: `/admin/product/updateSpuInfo`, method: 'post', data: spu })
+  } else {
+    // 添加sku
+    return request({ url: `/admin/product/saveSpuInfo`, method: 'post', data: spu })
+  }
+}

@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card style="margin: 20px 0">
-      <CategorySelect :show="!show" @getCategoryId="getCategoryId" />
+      <CategorySelect :show="screen != 0" @getCategoryId="getCategoryId" />
     </el-card>
     <el-card>
       <!-- 底部将会有三部分进行切换 -->
