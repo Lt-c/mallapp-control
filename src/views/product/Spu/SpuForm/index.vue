@@ -55,8 +55,8 @@
               class="input-new-tag"
               size="mini"
               @blur="handleInputConfirm(row)"
+              @keyup.enter.native="handleInputConfirm(row)"
             />
-            <!-- @keyup.enter.native="handleInputConfirm" -->
             <el-button v-else class="button-new-tag" size="small" @click="addSaleAttrValue(row)">添加</el-button>
           </template>
         </el-table-column>
@@ -95,14 +95,13 @@ export default {
         // 品牌id
         tmId: 0,
         // spu图片列表
-        spuImageList: [
-          // {
-          //   id: 0,
-          //   imgName: 'string',
-          //   imgUrl: 'string',
-          //   spuId: 0
-          // }
-        ],
+        spuImageList: [],
+        // {
+        //   id: 0,
+        //   imgName: 'string',
+        //   imgUrl: 'string',
+        //   spuId: 0
+        // }
         // spu售卖属性与属性值
         spuSaleAttrList: [
           // {
@@ -146,26 +145,33 @@ export default {
     // 照片墙相关的 两个methods
     // 照片墙删除某一个照片会触发
     handleRemove(file, fileList) {
-      console.log(file, fileList)
+      // console.log(file, fileList)
       // 收集照片墙的数据，fileList是删除某一张图之后的数据，含有 name url，是因为照片墙需要
       // 对于服务器,不需要这个数据,在上传时,需要进行处理
-      this.spuImageList = fileList
+      this.spuImgList = fileList
     },
     handlePictureCardPreview(file) {
-      console.log(file)
+      // console.log(file)
       this.dialogImageUrl = file.url
       // 显示对话框，显示图片
       this.dialogVisible = true
     },
+    // 收集图片信息
     handleUploadSuccess(response, file, fileList) {
-      const imgInfo = {
-        spuId: this.spu.id,
-        imgUrl: response.data,
-        imgName: file.name,
-        url: response.data,
-        name: file.name
-      }
-      this.spuImgList.push(imgInfo)
+      // const imgInfo = {
+      //   spuId: this.spu.id,
+      //   imgUrl: response.data,
+      //   imgName: file.name,
+      //   url: response.data,
+      //   name: file.name
+      // }
+      // fileList = fileList.forEach(item => {
+      //   item.spuId = this.spu.id
+      //   item.imgUrl = response.data
+      //   item.url = item.imgUrl
+      // })
+      // console.log(fileList,response,file);
+      this.spuImgList = fileList
     },
     // 初始化SpuForm数据
     async initSpuData(spu) {
@@ -213,6 +219,10 @@ export default {
       this.$set(row, 'inputVisible', true)
       // input框的中数据，需要进行收集,用 inputValue 字段收集新增的销售属性值
       this.$set(row, 'inputValue', '')
+      // 自动获取焦点
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus()
+      })
     },
     // el-input 也就是输入完成的回调
     handleInputConfirm(row) {
@@ -236,7 +246,14 @@ export default {
     },
     // 点击保存的回调，向服务器发起请求
     addOrUpdateSku() {
-      console.log('addOrUpdateSku')
+      // 整理图片
+      const imgArr = this.spuImgList.filter(item => {
+        const { id, imgName, imgUrl, spuId } = item
+        return { id, imgName, imgUrl, spuId }
+      })
+      this.spu.spuImageList = imgArr
+      console.log(this.spu)
+      this.$API.spu.reqAddOrUpdateSku(this.spu)
     }
 
   }
