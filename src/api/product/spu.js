@@ -24,3 +24,6 @@ export const reqAddOrUpdateSku = (spu) => {
     return request({ url: `/admin/product/saveSpuInfo`, method: 'post', data: spu })
   }
 }
+
+// 删除spu的api  /admin/product/deleteSpu/{spuId}  delete
+export const reqDeleteSpu = (spuId) => request({ url: `/admin/product/deleteSpu/${spuId}`, method: 'delete' })

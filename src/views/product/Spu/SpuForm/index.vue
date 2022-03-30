@@ -69,7 +69,7 @@
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="addOrUpdateSku">保存</el-button>
-      <el-button @click="$emit('changeScreen', 0)">取消</el-button>
+      <el-button @click="cancel">取消</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -93,7 +93,7 @@ export default {
         // spu名称
         spuName: '',
         // 品牌id
-        tmId: 0,
+        tmId: '',
         // spu图片列表
         spuImageList: [],
         // {
@@ -165,15 +165,11 @@ export default {
       //   url: response.data,
       //   name: file.name
       // }
-      // fileList = fileList.forEach(item => {
-      //   item.spuId = this.spu.id
-      //   item.imgUrl = response.data
-      //   item.url = item.imgUrl
-      // })
+
       // console.log(fileList,response,file);
       this.spuImgList = fileList
     },
-    // 初始化SpuForm数据
+    // 初始化SpuForm数据 修改的按钮
     async initSpuData(spu) {
       console.log('发数据', spu)
       // 获取spu信息的数据
@@ -245,15 +241,47 @@ export default {
       row.inputVisible = false
     },
     // 点击保存的回调，向服务器发起请求
-    addOrUpdateSku() {
+    async addOrUpdateSku() {
       // 整理图片
-      const imgArr = this.spuImgList.filter(item => {
-        const { id, imgName, imgUrl, spuId } = item
-        return { id, imgName, imgUrl, spuId }
+      this.spu.spuImageList = this.spuImgList.map(item => {
+        return {
+          imgName: item.imgName,
+          imgUrl: item.imgUrl || item.response.data
+        }
       })
-      this.spu.spuImageList = imgArr
-      console.log(this.spu)
-      this.$API.spu.reqAddOrUpdateSku(this.spu)
+      // 发请求
+      const result = await this.$API.spu.reqAddOrUpdateSku(this.spu)
+      console.log(result)
+      if (result.code === 200) {
+        this.$message({ type: 'success', message: 'SPU修改成功' })
+        // 跳转到spulist页面
+        this.$emit('changeScreen', { screen: 0, flag: '' })
+      }
+    },
+    // 点击添加sku按钮的回调，请求数据，需要收集两个数据
+    async addSpuData(category3Id) {
+      // 收集三级分类id
+      this.spu.category3Id = category3Id
+      // 获取品牌的信息
+      const tmResult = await this.$API.spu.reqTradeMarkList()
+      if (tmResult.code === 200) {
+        this.tmList = tmResult.data
+      }
+      // 获取平台全部的销售属性
+      const saleResult = await this.$API.spu.reqBaseSaleAttrList()
+      if (saleResult.code === 200) {
+        this.saleAttrList = saleResult.data
+      }
+    },
+    // 取消按钮，不保存，不修改
+    cancel() {
+      this.$emit('changeScreen', { screen: 0, flag: '' })
+      // 清理数据
+      // Object.assign合并对象
+      // console.log(this._data) // 是目前的响应式数据
+      // console.log(this.$options.data())
+      Object.assign(this._data, this.$options.data())
+      // this.$options可以获取配置对象，这个data()就是原始的对象
     }
 
   }

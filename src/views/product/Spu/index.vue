@@ -7,7 +7,7 @@
       <!-- 底部将会有三部分进行切换 -->
       <div v-show="screen==0">
         <!-- 展示spu列表  :disabled="!category3Id" -->
-        <el-button type="primary" icon="el-icon-plus" @click="addSku">添加Spu</el-button>
+        <el-button type="primary" icon="el-icon-plus" :disabled="!category3Id" @click="addSku">添加Spu</el-button>
         <el-table style="width: 100%" border :data="list">
           <el-table-column type="index" label="序号" align="center" width="80" />
           <el-table-column prop="spuName" label="Sku名称" width="width" />
@@ -19,7 +19,9 @@
               <hint-button type="success" icon="el-icon-plus" size="mini" title="添加Sku">1</hint-button>
               <hint-button type="warning" icon="el-icon-edit" size="mini" title="修改Sku" @click="updataSku(row)">2</hint-button>
               <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前Spu全部Sku列表">3</hint-button>
-              <hint-button type="danger" icon="el-icon-delete" size="mini" title="删除Spu">4</hint-button>
+              <el-popconfirm title="确定要删除这个SPU嘛？" @onConfirm="deleteSku(row)">
+                <hint-button slot="reference" type="danger" icon="el-icon-delete" size="mini" title="删除Spu">4</hint-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -60,7 +62,7 @@ export default {
       // table中需要展示的数据
       list: [],
       // 控制三个展示内容
-      screen: 1 // 0表示展示spu列表数据 1表示展示添加|修改spu数据 2表示展示添加sku页面
+      screen: 0 // 0表示展示spu列表数据 1表示展示添加|修改spu数据 2表示展示添加sku页面
 
     }
   },
@@ -104,6 +106,8 @@ export default {
     // 添加spu
     addSku() {
       this.screen = 1
+      // 让子组件发送请求，获取品牌列表和销售属性
+      this.$refs.spu.addSpuData(this.category3Id)
     },
     // 修改某一个spu
     updataSku(row) {
@@ -113,8 +117,26 @@ export default {
       this.$refs.spu.initSpuData(row)
     },
     // 取消按钮，需要子组件传递给父组件
-    changeScreen(screen) {
+    changeScreen({ screen, flag }) {
       this.screen = screen
+      // 切换后需要重新发起请求，新增|修改spu都会返回到这个页面
+      // this.getSpuList(this.page)// 停留在当前页面
+      if (flag === '修改') {
+        this.getSpuList(this.page)
+      } else {
+        this.getSpuList()
+      }
+    },
+    // 删除spu
+    async deleteSku(row) {
+      console.log(row)
+      // this.$API.sku.reqDeleteSpu(row.id)
+      const result = await this.$API.sku.reqDeleteSpu(row.id)
+      if (result.code === 200) {
+        this.$message({ type: 'success', message: '删除成功' })
+        // 重新发起请求，判断当前页面是否有数据，有就停留当前页面，没有就返回上一页
+        this.getSpuList(this.list.length > 1 ? this.page : this.page - 1)
+      }
     }
   }
 }
