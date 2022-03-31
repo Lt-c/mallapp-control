@@ -16,7 +16,7 @@
             <template slot-scope="{row}">
               <!-- {{ row }} -->
               <!-- 按钮，这里按钮将来用hintbutton替代 因为鼠标hover时需要有提示 -->
-              <hint-button type="success" icon="el-icon-plus" size="mini" title="添加Sku" @click="addSku">1</hint-button>
+              <hint-button type="success" icon="el-icon-plus" size="mini" title="添加Sku" @click="addSku(row)">1</hint-button>
               <hint-button type="warning" icon="el-icon-edit" size="mini" title="修改Sku" @click="updataSku(row)">2</hint-button>
               <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前Spu全部Sku列表">3</hint-button>
               <el-popconfirm title="确定要删除这个SPU嘛？" @onConfirm="deleteSku(row)">
@@ -37,7 +37,7 @@
         />
       </div>
       <SpuForm v-show="screen==1" ref="spu" @changeScreen="changeScreen" />
-      <SkuForm v-show="screen==2" />
+      <SkuForm v-show="screen==2" ref="sku" @changeScreen="changeScreen" />
     </el-card>
   </div>
 </template>
@@ -139,9 +139,9 @@ export default {
       }
     },
     // 新增sku 第一个绿色按钮
-    addSku() {
+    addSku(row) {
       this.screen = 2
-      console.log(11)
+      this.$refs.sku.getData(this.category1Id, this.category2Id, row)
     }
   }
 }
