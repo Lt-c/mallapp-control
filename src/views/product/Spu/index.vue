@@ -7,7 +7,7 @@
       <!-- 底部将会有三部分进行切换 -->
       <div v-show="screen==0">
         <!-- 展示spu列表  :disabled="!category3Id" -->
-        <el-button type="primary" icon="el-icon-plus" :disabled="!category3Id" @click="addSku">添加Spu</el-button>
+        <el-button type="primary" icon="el-icon-plus" :disabled="!category3Id" @click="addSpu">添加Spu</el-button>
         <el-table style="width: 100%" border :data="list">
           <el-table-column type="index" label="序号" align="center" width="80" />
           <el-table-column prop="spuName" label="Sku名称" width="width" />
@@ -16,7 +16,7 @@
             <template slot-scope="{row}">
               <!-- {{ row }} -->
               <!-- 按钮，这里按钮将来用hintbutton替代 因为鼠标hover时需要有提示 -->
-              <hint-button type="success" icon="el-icon-plus" size="mini" title="添加Sku">1</hint-button>
+              <hint-button type="success" icon="el-icon-plus" size="mini" title="添加Sku" @click="addSku">1</hint-button>
               <hint-button type="warning" icon="el-icon-edit" size="mini" title="修改Sku" @click="updataSku(row)">2</hint-button>
               <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前Spu全部Sku列表">3</hint-button>
               <el-popconfirm title="确定要删除这个SPU嘛？" @onConfirm="deleteSku(row)">
@@ -62,7 +62,7 @@ export default {
       // table中需要展示的数据
       list: [],
       // 控制三个展示内容
-      screen: 0 // 0表示展示spu列表数据 1表示展示添加|修改spu数据 2表示展示添加sku页面
+      screen: 2 // 0表示展示spu列表数据 1表示展示添加|修改spu数据 2表示展示添加sku页面
 
     }
   },
@@ -104,7 +104,7 @@ export default {
       this.getSpuList()
     },
     // 添加spu
-    addSku() {
+    addSpu() {
       this.screen = 1
       // 让子组件发送请求，获取品牌列表和销售属性
       this.$refs.spu.addSpuData(this.category3Id)
@@ -137,6 +137,11 @@ export default {
         // 重新发起请求，判断当前页面是否有数据，有就停留当前页面，没有就返回上一页
         this.getSpuList(this.list.length > 1 ? this.page : this.page - 1)
       }
+    },
+    // 新增sku 第一个绿色按钮
+    addSku() {
+      this.screen = 2
+      console.log(11)
     }
   }
 }
