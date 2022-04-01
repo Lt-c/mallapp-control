@@ -131,11 +131,12 @@ export default {
     async deleteSku(row) {
       console.log(row)
       // this.$API.sku.reqDeleteSpu(row.id)
-      const result = await this.$API.sku.reqDeleteSpu(row.id)
+      const result = await this.$API.spu.reqDeleteSpu(row.id)
       if (result.code === 200) {
         this.$message({ type: 'success', message: '删除成功' })
         // 重新发起请求，判断当前页面是否有数据，有就停留当前页面，没有就返回上一页
-        this.getSpuList(this.list.length > 1 ? this.page : this.page - 1)
+        // 使用已经处理好的函数跳转函数
+        this.handleCurrentChange(this.list.length > 1 ? this.page : this.page - 1)
       }
     },
     // 新增sku 第一个绿色按钮

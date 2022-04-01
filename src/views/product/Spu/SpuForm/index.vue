@@ -55,8 +55,8 @@
               class="input-new-tag"
               size="mini"
               @blur="handleInputConfirm(row)"
-              @keyup.enter.native="handleInputConfirm(row)"
             />
+            <!-- @keyup.enter.native="handleInputConfirm(row)" -->
             <el-button v-else class="button-new-tag" size="small" @click="addSaleAttrValue(row)">添加</el-button>
           </template>
         </el-table-column>
