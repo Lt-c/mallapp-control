@@ -1,11 +1,27 @@
 <template>
   <div>
-    <el-card style="margin: 20px 0">
-      <CategorySelect :show="!show" @getCategoryId="getCategoryId" />
-    </el-card>
-    <el-card>
-      <div />
-    </el-card>
+    <!-- 表格 -->
+    <el-table style="width: 100%" border>
+      <el-table-column type="index" align="center" label="序号" width="80"> 1 </el-table-column>
+      <el-table-column prop="prop" label="名称" width="width"> 2 </el-table-column>
+      <el-table-column prop="prop" label="描述" width="width"> 3 </el-table-column>
+      <el-table-column prop="prop" label="默认图片" width="110"> 4 </el-table-column>
+      <el-table-column prop="prop" label="重量" width="80"> 5 </el-table-column>
+      <el-table-column prop="prop" label="价格" width="80"> 6 </el-table-column>
+      <el-table-column prop="prop" label="操作" width="width"> 7 </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <el-pagination
+      style="text-align:center"
+      :current-page="1"
+      :page-sizes="[10, 20, 50]"
+      :page-size="10"
+      layout="prev, pager, next, jumper,->,sizes, total"
+      :total="20"
+    >
+      <!-- @size-change="handleSizeChange"
+      @current-change="handleCurrentChange" -->
+    </el-pagination>
   </div>
 </template>
 

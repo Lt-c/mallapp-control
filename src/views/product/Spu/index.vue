@@ -18,7 +18,7 @@
               <!-- 按钮，这里按钮将来用hintbutton替代 因为鼠标hover时需要有提示 -->
               <hint-button type="success" icon="el-icon-plus" size="mini" title="添加Sku" @click="addSku(row)">1</hint-button>
               <hint-button type="warning" icon="el-icon-edit" size="mini" title="修改Sku" @click="updataSku(row)">2</hint-button>
-              <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前Spu全部Sku列表">3</hint-button>
+              <hint-button type="info" icon="el-icon-info" size="mini" title="查看当前Spu全部Sku列表" @click="handlerDialog(row)">3</hint-button>
               <el-popconfirm title="确定要删除这个SPU嘛？" @onConfirm="deleteSku(row)">
                 <hint-button slot="reference" type="danger" icon="el-icon-delete" size="mini" title="删除Spu">4</hint-button>
               </el-popconfirm>
@@ -37,8 +37,20 @@
         />
       </div>
       <SpuForm v-show="screen==1" ref="spu" @changeScreen="changeScreen" />
-      <SkuForm v-show="screen==2" ref="sku" @changeScreen="changeScreen" />
+      <SkuForm v-show="screen==2" ref="sku" @changeScreens="changeScreens" />
     </el-card>
+    <el-dialog :title="`${spu.spuName}的sku列表`" :visible.sync="dialogTableVisible" :before-close="handleClose">
+      <el-table v-loading="loading" :data="skuInfo" border>
+        <el-table-column prop="skuName" label="名称" width="150" />
+        <el-table-column prop="price" label="价格" width="200" />
+        <el-table-column prop="weight" label="重量" width="200" />
+        <el-table-column label="默认图片">
+          <template slot-scope="{row}">
+            <img :src="row.skuDefaultImg" alt="" style="width:100px;height:100px">
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -62,8 +74,12 @@ export default {
       // table中需要展示的数据
       list: [],
       // 控制三个展示内容
-      screen: 2 // 0表示展示spu列表数据 1表示展示添加|修改spu数据 2表示展示添加sku页面
-
+      screen: 0, // 0表示展示spu列表数据 1表示展示添加|修改spu数据 2表示展示添加sku页面
+      // 控制展示列表
+      dialogTableVisible: false,
+      spu: {},
+      skuInfo: [],
+      loading: true
     }
   },
   methods: {
@@ -127,6 +143,10 @@ export default {
         this.getSpuList()
       }
     },
+    //
+    changeScreens(screen) {
+      this.screen = screen
+    },
     // 删除spu
     async deleteSku(row) {
       console.log(row)
@@ -143,6 +163,27 @@ export default {
     addSku(row) {
       this.screen = 2
       this.$refs.sku.getData(this.category1Id, this.category2Id, row)
+    },
+    // 控制diaLog
+    async handlerDialog(spu) {
+      this.dialogTableVisible = true
+      // 保存spu信息
+      this.spu = spu
+      // 发请求
+      const result = await this.$API.spu.reqSkuList(spu.id)
+      if (result.code === 200) {
+        this.skuInfo = result.data
+        this.loading = false
+      }
+    },
+    // 关闭dialog的回调
+    handleClose(done) {
+      // 关闭对话框
+      done()
+      // 清除加载动画
+      this.loading = true
+      // 清除数据
+      this.skuInfo = []
     }
   }
 }

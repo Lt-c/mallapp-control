@@ -16,17 +16,17 @@
       <el-input v-model="skuInfo.skuDesc" type="textarea" rows="3" />
     </el-form-item>
     <el-form-item label="平台属性">
-      <el-form ref="form" :inline="true" :model="form" label-width="80px">
+      <el-form ref="form" :inline="true" label-width="80px">
         <el-form-item v-for="attr in attrInfoList" :key="attr.id" :label="attr.attrName">
           <!-- 把数据放在attr对象的各自的attr上 -->
           <el-select v-model="attr.attrIdAndValueId" placeholder="请选择">
-            <el-option v-for="item in attr.attrValueList" :key="item.id" :label="item.valueName" :value="`${item.id}:${item.valueName}`" />
+            <el-option v-for="item in attr.attrValueList" :key="item.id" :label="item.valueName" :value="`${attr.id}:${item.id}`" />
           </el-select>
         </el-form-item>
       </el-form>
     </el-form-item>
     <el-form-item label="销售属性">
-      <el-form ref="form" :inline="true" :model="form" label-width="80px">
+      <el-form ref="form" :inline="true" label-width="80px">
         <el-form-item v-for="saleAttr in spuSaleAttrList" :key="saleAttr.id" :label="saleAttr.saleAttrName">
           <el-select v-model="saleAttr.attrIdAndValueId" placeholder="请选择">
             <el-option v-for="item in saleAttr.spuSaleAttrValueList" :key="item.id" :label="item.saleAttrValueName" :value="`${saleAttr.id}:${item.id}`" />
@@ -64,7 +64,6 @@ export default {
   name: 'SkuForm',
   data() {
     return {
-      form: {},
       spuImageList: [],
       spuSaleAttrList: [],
       attrInfoList: [],
@@ -168,11 +167,50 @@ export default {
     },
     // 取消按钮的回调
     cancel() {
-      this.$emit('changeScreen', { screen: 0, flag: '' })
+      this.$emit('changeScreens', 0)
       console.log(111)
+      // 清除数据
+      Object.assign(this._data, this.$options.data())
     },
-    saveSku() {
-      // this.$API.sku.reqSavaSkuInfo(this.skuInfo)
+    async saveSku() {
+      // 整理参数
+      const { attrInfoList, skuInfo, spuSaleAttrList, imageList } = this
+      // 平台属性 attrId 和 valueId
+      // 方式一 直接使用foreach
+
+      // 方式二 使用reduce函数
+      skuInfo.skuAttrValueList = attrInfoList.reduce((prev, item) => {
+        if (item.attrIdAndValueId) {
+          const [attrId, valueId] = item.attrIdAndValueId.split(':')
+          prev.push({ attrId, valueId })
+        }
+        return prev
+      }, [])
+
+      // 整理销售属性
+      skuInfo.skuSaleAttrValueList = spuSaleAttrList.reduce((prev, item) => {
+        if (item.attrIdAndValueId) {
+          const [saleAttrId, saleAttrValueId] = item.attrIdAndValueId.split(':')
+          prev.push({ saleAttrId, saleAttrValueId })
+        }
+        return prev
+      }, [])
+
+      // 整理图片数据
+      skuInfo.skuImageList = imageList.map(item => {
+        return {
+          imgName: item.imgName,
+          imgUrl: item.imgUrl,
+          isDefault: item.isDefault,
+          spuImgId: item.id
+        }
+      })
+      const result = await this.$API.spu.reqSavaSkuInfo(this.skuInfo)
+      if (result.code === 200) {
+        this.$message({ type: 'success', message: '添加SKU成功' })
+        this.$emit('changeScreens', 0)
+        // 此处不用再次发送请求，并没哟新增spu，查看sku界面就可以看到新增的sku
+      }
     }
   }
 }
