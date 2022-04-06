@@ -35,19 +35,25 @@
       </el-form>
     </el-form-item>
     <el-form-item label="图片列表">
-      <el-table style="width: 100%" border :data="spuImageList">
-        <el-table-column type="selection" prop="prop" width="80" />
+      <el-table style="width: 100%" border :data="spuImageList" @selection-change="handleSelectionChange">
+        <!-- selection-change 当选择项发生变化时会触发该事件 -->
+        <el-table-column type="selection" prop="prop" width="80" align="center" />
         <el-table-column label="图片" width="width">
           <template slot-scope="{row}">
             <img :src="row.imgUrl" style="width:100px;height:100px" alt="">
           </template>
         </el-table-column>
-        <el-table-column prop="imgName" label="名称" width="width">1 </el-table-column>
-        <el-table-column label="操作" width="width">1 </el-table-column>
+        <el-table-column prop="imgName" label="名称" width="width" />
+        <el-table-column label="操作" width="width">
+          <template slot-scope="{row, $index}">
+            <el-button v-if="!row.isDefault" type="primary" @click="changDefault(row)">设为默认</el-button>
+            <el-button v-else>默认</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary">保存</el-button>
+      <el-button type="primary" @click="saveSku">保存</el-button>
       <el-button @click="cancel">取消</el-button>
     </el-form-item>
   </el-form>
@@ -76,57 +82,63 @@ export default {
         // 默认图片
         skuDefaultImg: '',
         skuAttrValueList: [
-          {
-            attrId: 0,
-            attrName: '',
-            id: 0,
-            skuId: 0,
-            valueId: 0,
-            valueName: ''
-          }
+          // {
+          //   attrId: 0,
+          //   attrName: '',
+          //   id: 0,
+          //   skuId: 0,
+          //   valueId: 0,
+          //   valueName: ''
+          // }
         ],
         skuImageList: [
-          {
-            id: 0,
-            imgName: '',
-            imgUrl: '',
-            isDefault: '',
-            skuId: 0,
-            spuImgId: 0
-          }
+          // {
+          //   id: 0,
+          //   imgName: '',
+          //   imgUrl: '',
+          //   isDefault: '',
+          //   skuId: 0,
+          //   spuImgId: 0
+          // }
         ],
         skuSaleAttrValueList: [
-          {
-            id: 0,
-            saleAttrId: 0,
-            saleAttrName: 'string',
-            saleAttrValueId: 0,
-            saleAttrValueName: 'string',
-            skuId: 0,
-            spuId: 0
-          }
+          // {
+          //   id: 0,
+          //   saleAttrId: 0,
+          //   saleAttrName: 'string',
+          //   saleAttrValueId: 0,
+          //   saleAttrValueName: 'string',
+          //   skuId: 0,
+          //   spuId: 0
+          // }
         ]
 
       },
-      spu: { }
+      spu: {},
+      // 收集图片的数据字段，判断是否为默认图片等
+      imageList: []
     }
   },
   methods: {
     async getData(category1Id, category2Id, spu) {
       console.log(spu)
-      // 获取sput图片
-      const imgResult = await this.$API.sku.reqSpuImgList(spu.id)
+      // 获取spu图片
+      const imgResult = await this.$API.spu.reqSpuImgList(spu.id)
       console.log(imgResult)
       if (imgResult.code === 200) {
-        this.spuImageList = imgResult.data
+        const list = imgResult.data
+        list.forEach(item => {
+          item.isDefault = 0
+        })
+        this.spuImageList = list
       }
       // 获取spu销售属性
-      const saleResult = await this.$API.sku.reqSpuSaleAttrList(spu.id)
+      const saleResult = await this.$API.spu.reqSpuSaleAttrList(spu.id)
       if (saleResult.code === 200) {
         this.spuSaleAttrList = saleResult.data
       }
       // 获取spu销售属性信息
-      const attrResult = await this.$API.sku.reqAttrInfoList(category1Id, category2Id, spu.category3Id)
+      const attrResult = await this.$API.spu.reqAttrInfoList(category1Id, category2Id, spu.category3Id)
       if (attrResult.code === 200) {
         this.attrInfoList = attrResult.data
       }
@@ -137,10 +149,30 @@ export default {
       this.skuInfo.tmId = spu.tmId
       this.spu = spu
     },
+    // table表格复选框的事件
+    handleSelectionChange(selection) {
+      // selection是已经选择图片的数组，需要注意，这个缺少设为默认的图片，也就是没有默认的isDefault字段
+      // console.log(selection)
+      this.imageList = selection
+    },
+    // 修改默认图片
+    changDefault(row) {
+      // 排他
+      this.spuImageList.forEach(item => {
+        item.isDefault = 0
+      })
+      // 选中的图片设为默认
+      row.isDefault = 1
+      // 收集默认图片的地址
+      this.skuInfo.skuDefaultImg = row.imgUrl
+    },
     // 取消按钮的回调
     cancel() {
       this.$emit('changeScreen', { screen: 0, flag: '' })
       console.log(111)
+    },
+    saveSku() {
+      // this.$API.sku.reqSavaSkuInfo(this.skuInfo)
     }
   }
 }

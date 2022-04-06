@@ -245,7 +245,7 @@ export default {
       // 整理图片
       this.spu.spuImageList = this.spuImgList.map(item => {
         return {
-          imgName: item.imgName,
+          imgName: item.name,
           imgUrl: item.imgUrl || item.response.data
         }
       })
