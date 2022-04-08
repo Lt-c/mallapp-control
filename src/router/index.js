@@ -99,6 +99,25 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/canvas',
+    component: Layout,
+    meta: { title: 'Canvas', icon: 'el-icon-collection' },
+    children: [
+      {
+        path: 'demo1',
+        name: 'Demo1',
+        component: () => import('@/views/canvas/Demo1.vue'),
+        meta: { title: 'Demo1' }
+      },
+      {
+        path: 'sku',
+        name: 'Sku',
+        component: () => import('@/views/product/Sku'),
+        meta: { title: 'Sku管理' }
+      }
+    ]
+  },
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
