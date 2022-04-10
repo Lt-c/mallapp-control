@@ -46,26 +46,13 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/index',
     children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
+      path: '/index',
+      name: 'Index',
       component: () => import('@/views/dashboard/index'),
       meta: { title: '首页', icon: 'dashboard' }
     }]
-  },
-
-  {
-    path: '/form',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
-      }
-    ]
   },
 
   {
@@ -102,19 +89,19 @@ export const constantRoutes = [
   {
     path: '/canvas',
     component: Layout,
-    meta: { title: 'Canvas', icon: 'el-icon-collection' },
+    meta: { title: 'Canvasdemo', icon: 'el-icon-collection' },
     children: [
       {
         path: 'demo1',
         name: 'Demo1',
         component: () => import('@/views/canvas/Demo1.vue'),
-        meta: { title: 'Demo1' }
+        meta: { title: 'Canvas' }
       },
       {
-        path: 'sku',
-        name: 'Sku',
-        component: () => import('@/views/product/Sku'),
-        meta: { title: 'Sku管理' }
+        path: 'svg',
+        name: 'Svg',
+        component: () => import('@/views/canvas/Demo2.vue'),
+        meta: { title: 'Svg' }
       }
     ]
   },
