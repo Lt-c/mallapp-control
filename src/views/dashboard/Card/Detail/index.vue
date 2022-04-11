@@ -7,7 +7,7 @@
     <div class="card-context">{{ count }}</div>
     <div class="card-charts">
       <slot name="charts">
-        dom
+        
       </slot>
     </div>
     <div class="card-footer">
@@ -34,10 +34,10 @@ export default {
   }
   .card-context {
     font-size: 30px;
-    padding: 10px 0px;
+    padding: 10px 0px 0px 0px;
   }
   .card-charts {
-    height: 40px;
+    height: 50px;
   }
   .card-footer {
     border-top: 1px solid #d9d9d9;
