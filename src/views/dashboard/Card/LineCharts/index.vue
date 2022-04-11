@@ -8,13 +8,15 @@ export default {
   name: 'LineCharts',
   mounted() {
     const dom = this.$refs.charts
-    console.log(dom.childNodes)
+    // console.log(dom)
     const myChart = echarts.init(dom)
     const options = {
       xAxis: {
         // 隐藏x轴
         show: false,
-        type: 'category'
+        type: 'category',
+        // 两侧是否留空
+        boundaryGap: false
 
       },
       yAxis: {
