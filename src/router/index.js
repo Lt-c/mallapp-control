@@ -54,6 +54,49 @@ export const constantRoutes = [
       meta: { title: '首页', icon: 'dashboard' }
     }]
   },
+  // 权限管理模块
+  {
+    path: '/acl',
+    component: Layout,
+    redirect: '/acl/page',
+    alwaysShow: true, // will always show the root menu
+    name: 'Acl',
+    meta: {
+      title: '权限管理',
+      icon: 'el-icon-lock',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: 'user',
+        component: () => import('@/views/acl/user'),
+        name: 'User',
+        meta: {
+          title: '用户管理',
+          roles: ['admin'] // or you can only set roles in sub nav
+        }
+      },
+
+      {
+        path: 'role',
+        component: () => import('@/views/acl/role'),
+        name: 'role',
+        meta: {
+          title: '角色管理',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'permission',
+        component: () => import('@/views/acl/permission'),
+        name: 'permission',
+        meta: {
+          title: '权限管理'
+          // if do not set roles, means: this page does not require permission
+        }
+      }
+    ]
+  },
 
   {
     path: '/product',
