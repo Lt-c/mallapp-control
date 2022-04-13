@@ -13,17 +13,20 @@ const getDefaultState = () => {
 const state = getDefaultState()
 
 const mutations = {
+  // 重置state
   RESET_STATE: (state) => {
     Object.assign(state, getDefaultState())
   },
   SET_TOKEN: (state, token) => {
     state.token = token
   },
-  SET_NAME: (state, name) => {
-    state.name = name
-  },
-  SET_AVATAR: (state, avatar) => {
-    state.avatar = avatar
+  // 存储用户信息
+  SET_USERINFO: (state, userInfo) => {
+    state.name = userInfo.name
+    state.avatar = userInfo.avatar
+    state.routes = userInfo.routes
+    state.roles = userInfo.roles
+    state.buttons = userInfo.buttons
   }
 }
 
@@ -47,16 +50,17 @@ const actions = {
   getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
       getInfo(state.token).then(response => {
+        // 返回的信息有name用户名 avatar头像
+        // routes 返回的标识，不同的用户应该展示哪些菜单的标记
+        // roles 用户角色信息
+        // buttons 按钮的信息 按钮权限用的标识
         const { data } = response
 
         if (!data) {
           return reject('Verification failed, please Login again.')
         }
 
-        const { name, avatar } = data
-
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+        commit('SET_USERINFO', data)
         resolve(data)
       }).catch(error => {
         reject(error)

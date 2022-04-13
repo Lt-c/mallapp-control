@@ -4,6 +4,8 @@ import * as attr from './product/attr'
 import * as sku from './product/sku'
 import * as spu from './product/spu'
 import * as user from './acl/user'
+import * as role from './acl/role'
+import * as permission from './acl/permission'
 
 // 对外暴露
 export default {
@@ -11,5 +13,7 @@ export default {
   attr,
   sku,
   spu,
-  user
+  user,
+  role,
+  permission
 }

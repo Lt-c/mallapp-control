@@ -87,6 +87,16 @@ export const constantRoutes = [
         }
       },
       {
+        name: 'RoleAuth',
+        path: 'role/auth/:id',
+        component: () => import('@/views/acl/role/roleAuth'),
+        meta: {
+          activeMenu: '/acl/role/list',
+          title: '角色授权'
+        },
+        hidden: true
+      },
+      {
         path: 'permission',
         component: () => import('@/views/acl/permission'),
         name: 'permission',
