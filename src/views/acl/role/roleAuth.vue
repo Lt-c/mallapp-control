@@ -74,7 +74,9 @@ export default {
       保存权限列表
       */
     save() {
-      var ids = this.$refs.tree.getCheckedKeys().join(',')
+      // var ids = this.$refs.tree.getCheckedKeys().join(',')
+      // 使用这种方式可以获取到tree父节点的
+      var ids = this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys()).join(',')
       /*
         vue elementUI tree树形控件获取父节点ID的实例
         修改源码:

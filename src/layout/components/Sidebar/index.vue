@@ -31,7 +31,10 @@ export default {
       'sidebar'
     ]),
     routes() {
-      return this.$router.options.routes
+      // 此处的源文件只遍历的了常量路由，此处需要修改为遍历仓库中计算出来的路由
+      // return this.$router.options.routes
+      console.log(this.$store.state.user.resultAllRoutes)
+      return this.$store.state.user.resultAllRoutes
     },
     activeMenu() {
       const route = this.$route

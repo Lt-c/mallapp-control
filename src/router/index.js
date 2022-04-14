@@ -32,18 +32,6 @@ import Layout from '@/layout'
  */
 export const constantRoutes = [
   {
-    path: '/login',
-    component: () => import('@/views/login/index'),
-    hidden: true
-  },
-
-  {
-    path: '/404',
-    component: () => import('@/views/404'),
-    hidden: true
-  },
-
-  {
     path: '/',
     component: Layout,
     redirect: '/dashboard',
@@ -54,11 +42,48 @@ export const constantRoutes = [
       meta: { title: '首页', icon: 'dashboard' }
     }]
   },
+
+  // {
+  //   path: '/canvas',
+  //   component: Layout,
+  //   meta: { title: 'Canvasdemo', icon: 'el-icon-collection' },
+  //   children: [
+  //     {
+  //       path: 'demo1',
+  //       name: 'Demo1',
+  //       component: () => import('@/views/canvas/Demo1.vue'),
+  //       meta: { title: 'Canvas' }
+  //     },
+  //     {
+  //       path: 'svg',
+  //       name: 'Svg',
+  //       component: () => import('@/views/canvas/Demo2.vue'),
+  //       meta: { title: 'Svg' }
+  //     }
+  //   ]
+  // },
+  {
+    path: '/login',
+    component: () => import('@/views/login/index'),
+    hidden: true
+  },
+
+  {
+    path: '/404',
+    component: () => import('@/views/404'),
+    hidden: true
+  }
+
+  // 404 page must be placed at the end !!!
+  // { path: '*', redirect: '/404', hidden: true }
+]
+// 异步路由，用于筛选符合条件的管理权限
+export const asyncRoutes = [
   // 权限管理模块
   {
     path: '/acl',
     component: Layout,
-    redirect: '/acl/page',
+    redirect: '/acl/user',
     alwaysShow: true, // will always show the root menu
     name: 'Acl',
     meta: {
@@ -80,7 +105,7 @@ export const constantRoutes = [
       {
         path: 'role',
         component: () => import('@/views/acl/role'),
-        name: 'role',
+        name: 'Role',
         meta: {
           title: '角色管理',
           roles: ['admin']
@@ -98,8 +123,8 @@ export const constantRoutes = [
       },
       {
         path: 'permission',
+        name: 'Permission',
         component: () => import('@/views/acl/permission'),
-        name: 'permission',
         meta: {
           title: '权限管理'
           // if do not set roles, means: this page does not require permission
@@ -107,9 +132,10 @@ export const constantRoutes = [
       }
     ]
   },
-
+  // 商品管理模块
   {
     path: '/product',
+    name: 'Product',
     component: Layout,
     meta: { title: '商品管理', icon: 'el-icon-goods' },
     children: [
@@ -139,29 +165,30 @@ export const constantRoutes = [
       }
     ]
   },
+  // 测试管理
   {
-    path: '/canvas',
+    path: '/test',
+    name: 'Test',
     component: Layout,
-    meta: { title: 'Canvasdemo', icon: 'el-icon-collection' },
+    meta: { title: '测试管理', icon: 'el-icon-goods' },
     children: [
       {
-        path: 'demo1',
-        name: 'Demo1',
-        component: () => import('@/views/canvas/Demo1.vue'),
-        meta: { title: 'Canvas' }
+        path: 'test1',
+        name: 'Test1',
+        component: () => import('@/views/test/test1'),
+        meta: { title: '测试管理1' }
       },
       {
-        path: 'svg',
-        name: 'Svg',
-        component: () => import('@/views/canvas/Demo2.vue'),
-        meta: { title: 'Svg' }
+        path: 'test2',
+        name: 'Test2',
+        component: () => import('@/views/test/test2'),
+        meta: { title: '测试管理2' }
       }
     ]
-  },
-
-  // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  }
 ]
+// 任意路由，当路径出错时，重定向到404
+export const anyRoutes = { path: '*', redirect: '/404', hidden: true }
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support

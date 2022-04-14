@@ -1,12 +1,23 @@
 import { login, logout, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
-import { resetRouter } from '@/router'
+import { resetRouter, asyncRoutes, anyRoutes, constantRoutes } from '@/router'
+import router from '@/router'
 
 const getDefaultState = () => {
   return {
     token: getToken(),
     name: '',
-    avatar: ''
+    avatar: '',
+    // 服务器返回的菜单信息，根据不同的角色返回的标记信息，数组中的元素是字符串
+    routes: [],
+    // 角色信息
+    roles: [],
+    // 按钮的权限信息
+    buttons: [],
+    // 对比之后【项目中已有的异步路由，需要与服务器返回的路由表作对比，
+    resultRoutes: [],
+    // 用户最终展示的路由
+    resultAllRoutes: []
   }
 }
 
@@ -27,7 +38,31 @@ const mutations = {
     state.routes = userInfo.routes
     state.roles = userInfo.roles
     state.buttons = userInfo.buttons
+  },
+  // 最终计算出来的异步路由
+  SET_RESULTASYNCROUTES(state, asyncRoutes) {
+    // 此时只是展示异步路由   但是一个用户完整路由，包含有常量、异步、任意路由
+    state.resultAsyncRoutes = asyncRoutes
+    // 计算出完整的路由表
+    state.resultAllRoutes = constantRoutes.concat(state.resultAsyncRoutes, anyRoutes)
+    // 给路由添加新的路由
+    console.log(state.resultAllRoutes)
+    router.addRoutes(state.resultAllRoutes)
   }
+}
+
+export const computedAsyncRoutes = (asyncRoutes, router) => {
+  // console.log(router)
+  return asyncRoutes.filter((item) => {
+    // console.log(item)
+    if (router.includes(item.name)) {
+      // 使用递归，判断是否有二级、三级。。。路由
+      if (item.children && item.children.length) {
+        item.children = computedAsyncRoutes(item.children, router)
+      }
+      return true
+    }
+  })
 }
 
 const actions = {
@@ -61,6 +96,8 @@ const actions = {
         }
 
         commit('SET_USERINFO', data)
+        // comiit 最后的路由结果
+        commit('SET_RESULTASYNCROUTES', computedAsyncRoutes(asyncRoutes, data.routes))
         resolve(data)
       }).catch(error => {
         reject(error)
